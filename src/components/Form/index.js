@@ -2,16 +2,19 @@ import React, { useState } from "react";
 import * as C from "./styles";
 import Grid from "../Grid";
 
-const Form = ( {handleAdd, transactionsList, setTransactionsList}) => {
+const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
   const [desc, setDesc] = useState("");
   const [amount, setAmount] = useState("");
   const [isExpense, setExpense] = useState(false);
+  const [category, setCategory] = useState(""); // Novo estado para a categoria
+
+  const categories = ["Alimentação", "Contas", "Entretenimento", "Outros"]; // Lista de categorias
 
   const generateID = () => Math.round(Math.random() * 1000);
 
   const handleSave = () => {
-    if (!desc || !amount) {
-      alert("Informe a descrição e o valor!");
+    if (!desc || !amount || !category) {
+      alert("Informe a descrição, o valor e a categoria!");
       return;
     } else if (amount < 1) {
       alert("O valor tem que ser positivo!");
@@ -23,12 +26,14 @@ const Form = ( {handleAdd, transactionsList, setTransactionsList}) => {
       desc: desc,
       amount: amount,
       expense: isExpense,
+      category: category,
     };
 
     handleAdd(transaction);
 
     setDesc("");
     setAmount("");
+    setCategory("");
   };
 
   //INSERIR AQUI AS OPÇÕES DE CATEGORIA E BOTÃO DE RELATÓRIO DE GASTOS, ESTILIZAR NO STYLES.JS
@@ -46,6 +51,20 @@ const Form = ( {handleAdd, transactionsList, setTransactionsList}) => {
             type="number"
             onChange={(e) => setAmount(e.target.value)}
           />
+        </C.InputContent>
+        <C.InputContent>
+          <C.Label>Categoria</C.Label>
+          <C.Select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="">Selecione uma categoria</option>
+            {categories.map((cat, index) => (
+              <option key={index} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </C.Select>
         </C.InputContent>
         <C.RadioGroup>
           <C.Input
