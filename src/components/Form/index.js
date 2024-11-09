@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import * as C from "./styles";
 import Grid from "../Grid";
 
-const Form = ( {handleAdd, transactionList, setTransactionsList}) => {
+const Form = ( {handleAdd, transactionsList, setTransactionsList}) => {
   const [desc, setDesc] = useState("");
   const [amount, setAmount] = useState("");
   const [isExpense, setExpense] = useState(false);
 
-  const generateID = () => Math.round(Math.round() * 1000);
+  const generateID = () => Math.round(Math.random() * 1000);
 
   const handleSave = () => {
     if (!desc || !amount) {
@@ -66,7 +66,7 @@ const Form = ( {handleAdd, transactionList, setTransactionsList}) => {
         </C.RadioGroup>
         <C.Button onClick={handleSave}>ADICIONAR</C.Button>
       </C.Container>
-      <Grid itens={transactionList} setItens={setTransactionsList} />
+      <Grid itens={transactionsList} setItens={setTransactionsList} />
     </>
   );
 };

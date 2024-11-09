@@ -8,6 +8,7 @@ const Grid = ({ itens, setItens }) => {
     setItens(newArray);
     localStorage.setItem("transactions", JSON.stringify(newArray));
   };
+  
   return (
     <C.Table>
       <C.Thead>
