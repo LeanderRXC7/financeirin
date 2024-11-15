@@ -6,6 +6,7 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
   const [desc, setDesc] = useState("");
   const [amount, setAmount] = useState("");
   const [isExpense, setExpense] = useState(false);
+  const [date, setDate] = useState(""); // Novo estado para a data
   const [category, setCategory] = useState(""); // Novo estado para a categoria
 
   const categories = ["Alimentação", "Contas", "Entretenimento", "Outros"]; // Lista de categorias
@@ -26,6 +27,7 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
       desc: desc,
       amount: amount,
       expense: isExpense,
+      date: date, // Adicionando a data ao objeto de transação
       category: category,
     };
 
@@ -33,10 +35,10 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
 
     setDesc("");
     setAmount("");
+    setDate("");
     setCategory("");
   };
 
-  //INSERIR AQUI AS OPÇÕES DE CATEGORIA E BOTÃO DE RELATÓRIO DE GASTOS, ESTILIZAR NO STYLES.JS
   return (
     <>
       <C.Container>
@@ -52,6 +54,15 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
             onChange={(e) => setAmount(e.target.value)}
           />
         </C.InputContent>
+        <C.InputContent>
+          <C.Label>Data</C.Label>
+          <C.Input
+            type="date" // Campo de data
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </C.InputContent>
+
         <C.InputContent>
           <C.Label>Categoria</C.Label>
           <C.Select

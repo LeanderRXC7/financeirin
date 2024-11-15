@@ -27,9 +27,13 @@ export const Label = styled.label``;
 export const Input = styled.input`
   outline: none;
   border-radius: 5px;
-  padding: 5px 10px;
+  padding: 5px 0.5px;
   font-size: 15px;
   border: 1px solid #ccc;
+
+  &[type="date"] { /* Estilo específico para campos de data */
+    width: 110px; /* Mesmo tamanho dos outros campos */
+    height: 17px;
 `;
 
 export const RadioGroup = styled.div`
