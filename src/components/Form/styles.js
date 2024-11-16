@@ -66,3 +66,11 @@ export const Select = styled.select`
   background-color: white;
   cursor: pointer;
 `;
+
+export const Title = styled.h2`
+  text-align: center;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  font-size: 24px;
+  color: #333;
+`;

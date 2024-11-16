@@ -41,6 +41,8 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
 
   return (
     <>
+    {/* Adicionando o título "TRANSAÇÕES" */}
+    <C.Title>NOVA TRANSAÇÃO</C.Title>
       <C.Container>
         <C.InputContent>
           <C.Label>Descrição</C.Label>

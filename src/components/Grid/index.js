@@ -47,6 +47,9 @@ const Grid = ({ itens, setItens }) => {
 
   return (
     <div>
+
+      <C.Title>TRANSAÇÕES</C.Title>
+
       <C.Table>
         <C.Thead>
           <C.Tr>

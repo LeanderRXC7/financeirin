@@ -53,3 +53,11 @@ export const Th = styled.th`
   text-align: ${(props) => (props.alignCenter ? "center" : "start")};
   width: ${(props) => (props.width ? props.width + "%" : "auto")};
 `;
+
+export const Title = styled.h2`
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
+`;
+
