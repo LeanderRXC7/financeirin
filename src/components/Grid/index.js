@@ -8,6 +8,7 @@ const Grid = ({ itens, setItens }) => {
   const [reportContent, setReportContent] = useState("");
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Mês atual (1-12)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Ano atual
+  const [sortOption, setSortOption] = useState("category"); // Opção de ordenação
 
   const onDelete = (ID) => {
     const newArray = itens.filter((transaction) => transaction.id !== ID);
@@ -27,19 +28,38 @@ const Grid = ({ itens, setItens }) => {
       );
     });
 
-    // Agrupar por categoria e garantir que os valores sejam números
-    const groupedByCategory = filteredItems.reduce((acc, item) => {
-      const amount = parseFloat(item.amount) || 0; // Garantir que o valor seja um número
-      acc[item.category] = acc[item.category]
-        ? acc[item.category] + amount
-        : amount;
-      return acc;
-    }, {});
+    let report = "";
 
-    // Exibir o relatório
-    const report = Object.entries(groupedByCategory)
-      .map(([category, total]) => `${category}: R$ ${total.toFixed(2)}`) // Garantir que total seja número
-      .join("\n");
+    if (sortOption === "category") {
+      // Agrupar por categoria
+      const groupedByCategory = filteredItems.reduce((acc, item) => {
+        const amount = parseFloat(item.amount) || 0; // Garantir que o valor seja um número
+        acc[item.category] = acc[item.category]
+          ? acc[item.category] + amount
+          : amount;
+        return acc;
+      }, {});
+
+      // Criar o relatório agrupado por categoria
+      report = Object.entries(groupedByCategory)
+        .map(([category, total]) => `${category}: R$ ${total.toFixed(2)}`)
+        .join("\n");
+    } else if (sortOption === "period") {
+      // Ordenar por data
+      const sortedByDate = [...filteredItems].sort((a, b) =>
+        new Date(a.date) - new Date(b.date)
+      );
+
+      // Criar o relatório ordenado por período
+      report = sortedByDate
+        .map(
+          (item) =>
+            `${item.date}: ${item.category} - R$ ${parseFloat(item.amount).toFixed(
+              2
+            )}`
+        )
+        .join("\n");
+    }
 
     setReportContent(report);
     setShowModal(true);
@@ -47,7 +67,6 @@ const Grid = ({ itens, setItens }) => {
 
   return (
     <div>
-
       <C.Title>TRANSAÇÕES</C.Title>
 
       <C.Table>
@@ -55,7 +74,7 @@ const Grid = ({ itens, setItens }) => {
           <C.Tr>
             <C.Th width={25}>Descrição</C.Th>
             <C.Th width={10}>Valor</C.Th>
-            <C.Th width={10}>Data</C.Th> {/* Nova coluna para a data */}
+            <C.Th width={10}>Data</C.Th>
             <C.Th width={25}>Categoria</C.Th>
             <C.Th width={10} alignCenter>
               Tipo
@@ -69,6 +88,7 @@ const Grid = ({ itens, setItens }) => {
           ))}
         </C.Tbody>
       </C.Table>
+
       <C.SelectContainer>
         <label>
           Mês:
@@ -99,10 +119,22 @@ const Grid = ({ itens, setItens }) => {
             })}
           </select>
         </label>
+        <label>
+          Ordenar por:
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+          >
+            <option value="category">Categoria</option>
+            <option value="period">Período</option>
+          </select>
+        </label>
       </C.SelectContainer>
+
       <C.ReportButton onClick={handleReport}>
         RELATÓRIO DE GASTOS
       </C.ReportButton>
+
       <Modal show={showModal} onClose={() => setShowModal(false)}>
         <h2>Gastos do mês</h2>
         <pre>{reportContent}</pre>
