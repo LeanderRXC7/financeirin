@@ -9,6 +9,7 @@ const Grid = ({ itens, setItens }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Mês atual (1-12)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Ano atual
   const [sortOption, setSortOption] = useState("category"); // Opção de ordenação
+  const [reportType, setReportType] = useState("monthly"); // Tipo de relatório
 
   const onDelete = (ID) => {
     const newArray = itens.filter((transaction) => transaction.id !== ID);
@@ -17,40 +18,52 @@ const Grid = ({ itens, setItens }) => {
   };
 
   const handleReport = () => {
-    // Filtrar itens com base no mês e ano selecionados
     const filteredItems = itens.filter((item) => {
       if (!item.date) return false;
-      const [year, month] = item.date.split("-");
-      return (
-        parseInt(month) === parseInt(selectedMonth) &&
-        parseInt(year) === parseInt(selectedYear) &&
-        item.expense
-      );
+      const [year, month, day] = item.date.split("-");
+      const itemDate = new Date(year, month - 1, day);
+
+      if (reportType === "monthly") {
+        return (
+          parseInt(month) === parseInt(selectedMonth) &&
+          parseInt(year) === parseInt(selectedYear) &&
+          item.expense
+        );
+      } else if (reportType === "weekly") {
+        const currentDate = new Date();
+        const selectedDate = new Date(selectedYear, selectedMonth - 1);
+        const weekNumber = Math.ceil((itemDate.getDate() - 1) / 7);
+        const selectedWeek = Math.ceil((currentDate.getDate() - 1) / 7);
+
+        return (
+          parseInt(month) === parseInt(selectedMonth) &&
+          parseInt(year) === parseInt(selectedYear) &&
+          weekNumber === selectedWeek &&
+          item.expense
+        );
+      }
+      return false;
     });
 
     let report = "";
 
     if (sortOption === "category") {
-      // Agrupar por categoria
       const groupedByCategory = filteredItems.reduce((acc, item) => {
-        const amount = parseFloat(item.amount) || 0; // Garantir que o valor seja um número
+        const amount = parseFloat(item.amount) || 0;
         acc[item.category] = acc[item.category]
           ? acc[item.category] + amount
           : amount;
         return acc;
       }, {});
 
-      // Criar o relatório agrupado por categoria
       report = Object.entries(groupedByCategory)
         .map(([category, total]) => `${category}: R$ ${total.toFixed(2)}`)
         .join("\n");
     } else if (sortOption === "period") {
-      // Ordenar por data
       const sortedByDate = [...filteredItems].sort((a, b) =>
         new Date(a.date) - new Date(b.date)
       );
 
-      // Criar o relatório ordenado por período
       report = sortedByDate
         .map(
           (item) =>
@@ -90,6 +103,16 @@ const Grid = ({ itens, setItens }) => {
       </C.Table>
 
       <C.SelectContainer>
+        <label>
+          Tipo de relatório:
+          <select
+            value={reportType}
+            onChange={(e) => setReportType(e.target.value)}
+          >
+            <option value="monthly">Mensal</option>
+            <option value="weekly">Semanal</option>
+          </select>
+        </label>
         <label>
           Mês:
           <select
@@ -136,7 +159,7 @@ const Grid = ({ itens, setItens }) => {
       </C.ReportButton>
 
       <Modal show={showModal} onClose={() => setShowModal(false)}>
-        <h2>Gastos do mês</h2>
+        <h2>Relatório de Gastos</h2>
         <pre>{reportContent}</pre>
       </Modal>
     </div>
