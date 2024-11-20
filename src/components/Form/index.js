@@ -1,17 +1,18 @@
 import React, { useState } from "react";
 import * as C from "./styles";
 import Grid from "../Grid";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
+
 
 const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
   const [desc, setDesc] = useState("");
   const [amount, setAmount] = useState("");
   const [isExpense, setExpense] = useState(false);
-  const [date, setDate] = useState(""); // Novo estado para a data
-  const [category, setCategory] = useState(""); // Novo estado para a categoria
+  const [date, setDate] = useState("");
+  const [category, setCategory] = useState("");
 
-  const categories = ["Alimentação", "Contas", "Entretenimento", "Outros"]; // Lista de categorias
-
-  const generateID = () => Math.round(Math.random() * 1000);
+  const categories = ["Alimentação", "Contas", "Entretenimento", "Outros"];
 
   const handleSave = () => {
     if (!desc || !amount || !category) {
@@ -23,15 +24,24 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
     }
 
     const transaction = {
-      id: generateID(),
       desc: desc,
       amount: amount,
       expense: isExpense,
-      date: date, // Adicionando a data ao objeto de transação
+      date: date,
       category: category,
     };
 
-    handleAdd(transaction);
+    const saveTransactionToFirestore = async (transaction) => {
+      try {
+        const docRef = await addDoc(collection(db, "Transactions"), transaction);
+        console.log("Transação salva com ID:", docRef.id);
+        transaction.id = docRef.id;
+        handleAdd(transaction); // Atualiza o estado local
+      } catch (error) {
+        console.error("Erro ao salvar transação:", error);
+      }
+    };
+    saveTransactionToFirestore(transaction);
 
     setDesc("");
     setAmount("");
@@ -41,8 +51,7 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
 
   return (
     <>
-    {/* Adicionando o título "TRANSAÇÕES" */}
-    <C.Title>NOVA TRANSAÇÃO</C.Title>
+      <C.Title>NOVA TRANSAÇÃO</C.Title>
       <C.Container>
         <C.InputContent>
           <C.Label>Descrição</C.Label>
@@ -59,7 +68,7 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
         <C.InputContent>
           <C.Label>Data</C.Label>
           <C.Input
-            type="date" // Campo de data
+            type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import GridItem from "../GridItem";
 import * as C from "./styles";
 import Modal from "../Modal";
+import { doc, deleteDoc } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
 
 const Grid = ({ itens, setItens }) => {
   const [showModal, setShowModal] = useState(false);
@@ -12,9 +14,24 @@ const Grid = ({ itens, setItens }) => {
   const [reportType, setReportType] = useState("monthly"); // Tipo de relatório
 
   const onDelete = (ID) => {
+    if (!ID || typeof ID !== "string") {
+      console.error("ID inválido para exclusão:", ID);
+      return;
+    }
+    
     const newArray = itens.filter((transaction) => transaction.id !== ID);
     setItens(newArray);
-    localStorage.setItem("transactions", JSON.stringify(newArray));
+
+    const removeTransactionFromFirestore = async (ID) => {
+      try {
+        const docRef = doc(db, "Transactions", ID);
+        await deleteDoc(doc(db, "Transactions", ID));
+        console.log("Transação removida do Firestore!");
+      } catch (error) {
+        console.error("Erro ao remover transação:", error);
+      }
+    };
+    removeTransactionFromFirestore(ID);
   };
 
   const handleReport = () => {
@@ -81,7 +98,6 @@ const Grid = ({ itens, setItens }) => {
   return (
     <div>
       <C.Title>TRANSAÇÕES</C.Title>
-
       <C.Table>
         <C.Thead>
           <C.Tr>
@@ -101,7 +117,6 @@ const Grid = ({ itens, setItens }) => {
           ))}
         </C.Tbody>
       </C.Table>
-
       <C.SelectContainer>
         <label>
           Tipo de relatório:
@@ -153,11 +168,7 @@ const Grid = ({ itens, setItens }) => {
           </select>
         </label>
       </C.SelectContainer>
-
-      <C.ReportButton onClick={handleReport}>
-        RELATÓRIO DE GASTOS
-      </C.ReportButton>
-
+      <C.ReportButton onClick={handleReport}>RELATÓRIO DE GASTOS</C.ReportButton>
       <Modal show={showModal} onClose={() => setShowModal(false)}>
         <h2>Relatório de Gastos</h2>
         <pre>{reportContent}</pre>
