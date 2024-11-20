@@ -60,16 +60,16 @@ const Grid = ({ itens, setItens }) => {
         .map(([category, total]) => `${category}: R$ ${total.toFixed(2)}`)
         .join("\n");
     } else if (sortOption === "period") {
-      const sortedByDate = [...filteredItems].sort((a, b) =>
-        new Date(a.date) - new Date(b.date)
+      const sortedByDate = [...filteredItems].sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
       );
 
       report = sortedByDate
         .map(
           (item) =>
-            `${item.date}: ${item.category} - R$ ${parseFloat(item.amount).toFixed(
-              2
-            )}`
+            `${item.date}: ${item.desc} - R$ ${parseFloat(
+              item.amount
+            ).toFixed(2)}`
         )
         .join("\n");
     }

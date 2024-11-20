@@ -11,9 +11,11 @@ export const Table = styled.table`
 `;
 
 export const ReportButton = styled.button`
-  margin-left: 205px;
+  display: block; /* Garante que o margin auto funcione */
+  margin: 20px auto 0; /* Centraliza horizontalmente e adiciona margem superior */
+  padding: 10px 20px; /* Ajuste conforme necessário */
   margin-bottom: 20px;
-  padding: 10px 20px;
+  cursor: pointer; /* Indica interatividade */
   background-color: #003366;
   color: white;
   border: none;
@@ -28,9 +30,10 @@ export const ReportButton = styled.button`
 
 export const SelectContainer = styled.div`
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  margin-left: 205px;
+  justify-content: center; /* Centraliza horizontalmente */
+  align-items: center; /* Alinha verticalmente */
+  gap: 10px; /* Espaçamento entre o select e o botão */
+  width: 100%;
   label {
     font-size: 16px;
   }
@@ -60,4 +63,3 @@ export const Title = styled.h2`
   font-size: 24px;
   color: #333;
 `;
-
