@@ -3,12 +3,25 @@ import GlobalStyle from "./styles/global";
 import Header from "./components/header";
 import Resume from "./components/Resume";
 import Form from "./components/Form";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "./firebaseConfig";
 
 const App = () => {
-  const data = localStorage.getItem("transactions");
-  const [transactionsList, setTransactionsList] = useState(
-    data ? JSON.parse(data) : []
-  );
+  const [transactionsList, setTransactionsList] = useState([]);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "Transactions"));
+        const transactions = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setTransactionsList(transactions);
+      } catch (error) {
+        console.error("Erro ao buscar transações:", error);
+      }
+    };
+    fetchTransactions();
+  }, []);
+
   const [income, setIncome] = useState(0);
   const [expense, setExpense] = useState(0);
   const [total, setTotal] = useState(0);
@@ -34,10 +47,8 @@ const App = () => {
 
   const handleAdd = (transaction) => {
     const newArrayTransactions = [...transactionsList, transaction];
-
     setTransactionsList(newArrayTransactions);
-
-    localStorage.setItem("transactions", JSON.stringify(newArrayTransactions));
+    console.log("Transação salva localmente (apenas para fins de depuração).");
   };
 
   return (
