@@ -7,31 +7,42 @@ import { db } from "../../firebaseConfig";
 
 const Grid = ({ itens, setItens }) => {
   const [showModal, setShowModal] = useState(false);
+  const [confirmationModal, setConfirmationModal] = useState(false);
+  const [successModal, setSuccessModal] = useState(false);
   const [reportContent, setReportContent] = useState("");
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Mês atual (1-12)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Ano atual
   const [sortOption, setSortOption] = useState("category"); // Opção de ordenação
   const [reportType, setReportType] = useState("monthly"); // Tipo de relatório
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
 
-  const onDelete = (ID) => {
-    if (!ID || typeof ID !== "string") {
-      console.error("ID inválido para exclusão:", ID);
+  const confirmDelete = (ID) => {
+    setTransactionToDelete(ID);
+    setConfirmationModal(true);
+  };
+
+  const handleDelete = () => {
+    if (!transactionToDelete || typeof transactionToDelete !== "string") {
+      console.error("ID inválido para exclusão:", transactionToDelete);
       return;
     }
-    
-    const newArray = itens.filter((transaction) => transaction.id !== ID);
+
+    const newArray = itens.filter((transaction) => transaction.id !== transactionToDelete);
     setItens(newArray);
 
     const removeTransactionFromFirestore = async (ID) => {
       try {
         const docRef = doc(db, "Transactions", ID);
-        await deleteDoc(doc(db, "Transactions", ID));
+        await deleteDoc(docRef);
         console.log("Transação removida do Firestore!");
       } catch (error) {
         console.error("Erro ao remover transação:", error);
       }
     };
-    removeTransactionFromFirestore(ID);
+    removeTransactionFromFirestore(transactionToDelete);
+
+    setConfirmationModal(false);
+    setSuccessModal(true);
   };
 
   const handleReport = () => {
@@ -113,7 +124,11 @@ const Grid = ({ itens, setItens }) => {
         </C.Thead>
         <C.Tbody>
           {itens?.map((item, index) => (
-            <GridItem key={index} item={item} onDelete={onDelete} />
+            <GridItem
+              key={index}
+              item={item}
+              onDelete={confirmDelete}
+            />
           ))}
         </C.Tbody>
       </C.Table>
@@ -172,6 +187,17 @@ const Grid = ({ itens, setItens }) => {
       <Modal show={showModal} onClose={() => setShowModal(false)}>
         <h2>Relatório de Gastos</h2>
         <pre>{reportContent}</pre>
+      </Modal>
+      <Modal show={confirmationModal} onClose={() => setConfirmationModal(false)}>
+        <h2>Confirmar Exclusão</h2>
+        <p>Tem certeza de que deseja excluir esta transação?</p>
+        <button onClick={handleDelete}>Sim</button>
+        <button onClick={() => setConfirmationModal(false)}>Não</button>
+      </Modal>
+      <Modal show={successModal} onClose={() => setSuccessModal(false)}>
+        <h2>Sucesso</h2>
+        <p>Transação excluída com sucesso!</p>
+        <button onClick={() => setSuccessModal(false)}>Fechar</button>
       </Modal>
     </div>
   );
