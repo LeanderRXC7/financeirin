@@ -7,43 +7,44 @@ import { db } from "../../firebaseConfig";
 
 const Grid = ({ itens, setItens }) => {
   const [showModal, setShowModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); 
-  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false); 
+  const [showConfirmModal, setShowConfirmModal] = useState(false);  
+  const [showSuccessModal, setShowSuccessModal] = useState(false);  
   const [reportContent, setReportContent] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [sortOption, setSortOption] = useState("category");
-  const [reportType, setReportType] = useState("monthly");
-
-  const [itemToDelete, setItemToDelete] = useState(null); 
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); 
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); 
+  const [sortOption, setSortOption] = useState("category"); 
+  const [reportType, setReportType] = useState("monthly"); 
+  const [selectedItemID, setSelectedItemID] = useState(null);  
 
   const onDelete = (ID) => {
-    setItemToDelete(ID);
-    setShowDeleteConfirm(true); 
+    setSelectedItemID(ID);  
+    setShowConfirmModal(true);  
   };
 
   const handleConfirmDelete = async () => {
-    if (!itemToDelete) return;
+    if (!selectedItemID) return;
 
-    // Excluindo do estado local
-    const newArray = itens.filter((transaction) => transaction.id !== itemToDelete);
+
+    const newArray = itens.filter((transaction) => transaction.id !== selectedItemID);
     setItens(newArray);
 
-    // Excluindo do Firestore
-    try {
-      const docRef = doc(db, "Transactions", itemToDelete);
-      await deleteDoc(docRef);
-      console.log("Transação removida do Firestore!");
-      setShowDeleteConfirm(false); 
-      setShowDeleteSuccess(true); 
-    } catch (error) {
-      console.error("Erro ao remover transação:", error);
-      setShowDeleteConfirm(false); 
-    }
+
+    const removeTransactionFromFirestore = async () => {
+      try {
+        const docRef = doc(db, "Transactions", selectedItemID);
+        await deleteDoc(docRef);
+        console.log("Transação removida do Firestore!");
+      } catch (error) {
+        console.error("Erro ao remover transação:", error);
+      }
+    };
+    await removeTransactionFromFirestore();
+    setShowConfirmModal(false);  
+    setShowSuccessModal(true);  
   };
 
   const handleCancelDelete = () => {
-    setShowDeleteConfirm(false); 
+    setShowConfirmModal(false);  // Fechar modal de confirmação sem excluir
   };
 
   const handleReport = () => {
@@ -79,7 +80,9 @@ const Grid = ({ itens, setItens }) => {
     if (sortOption === "category") {
       const groupedByCategory = filteredItems.reduce((acc, item) => {
         const amount = parseFloat(item.amount) || 0;
-        acc[item.category] = acc[item.category] ? acc[item.category] + amount : amount;
+        acc[item.category] = acc[item.category]
+          ? acc[item.category] + amount
+          : amount;
         return acc;
       }, {});
 
@@ -94,7 +97,9 @@ const Grid = ({ itens, setItens }) => {
       report = sortedByDate
         .map(
           (item) =>
-            `${item.date}: ${item.desc} - R$ ${parseFloat(item.amount).toFixed(2)}`
+            `${item.date}: ${item.desc} - R$ ${parseFloat(
+              item.amount
+            ).toFixed(2)}`
         )
         .join("\n");
     }
@@ -177,24 +182,19 @@ const Grid = ({ itens, setItens }) => {
         </label>
       </C.SelectContainer>
       <C.ReportButton onClick={handleReport}>RELATÓRIO DE GASTOS</C.ReportButton>
-
-
       <Modal show={showModal} onClose={() => setShowModal(false)}>
         <h2>Relatório de Gastos</h2>
         <pre>{reportContent}</pre>
       </Modal>
 
-      <Modal show={showDeleteConfirm} onClose={handleCancelDelete}>
-        <h2>Confirmar Exclusão</h2>
-        <p>Tem certeza de que deseja excluir esta transação?</p>
+      <Modal show={showConfirmModal} onClose={() => setShowConfirmModal(false)}>
+        <h2>Tem certeza que deseja excluir essa transação?</h2>
         <button onClick={handleConfirmDelete}>Sim</button>
         <button onClick={handleCancelDelete}>Não</button>
       </Modal>
 
-      <Modal show={showDeleteSuccess} onClose={() => setShowDeleteSuccess(false)}>
-        <h2>Exclusão bem-sucedida!</h2>
-        <p>A transação foi excluída com sucesso.</p>
-        <button onClick={() => setShowDeleteSuccess(false)}>Fechar</button>
+      <Modal show={showSuccessModal} onClose={() => setShowSuccessModal(false)}>
+        <h2>Exclusão realizada com sucesso!</h2>
       </Modal>
     </div>
   );
