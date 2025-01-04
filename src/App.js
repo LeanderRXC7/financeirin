@@ -5,7 +5,7 @@ import Resume from "./components/Resume";
 import Form from "./components/Form";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "./firebaseConfig";
-import { suggestSavings } from "./geminiAI"; // Importa a função de sugestões
+import { suggestSavings } from "./geminiAI"; // Importa a função de sugestões para uso da IA
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRobot } from "@fortawesome/free-solid-svg-icons"; // Ícone de robô
 
