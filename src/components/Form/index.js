@@ -12,7 +12,7 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
   const [date, setDate] = useState("");
   const [category, setCategory] = useState("");
 
-  const categories = ["Alimentação", "Contas", "Entretenimento", "Transporte", "Moradia", "Vestuário", "Educação", "Saúde", "Outros"];
+  const categories = ["Rendas", "Alimentação", "Contas", "Entretenimento", "Transporte", "Moradia", "Vestuário", "Educação", "Saúde", "Outros"];
 
   const handleSave = () => {
     if (!desc || !amount || !category) {

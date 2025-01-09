@@ -2,36 +2,54 @@ import React, { useState } from "react";
 import GridItem from "../GridItem";
 import * as C from "./styles";
 import Modal from "../Modal";
+import ConfirmModal from "../ConfirmModal";
 import { doc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 
 const Grid = ({ itens, setItens }) => {
   const [showModal, setShowModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);  
+  const [showSuccessModal, setShowSuccessModal] = useState(false);  
   const [reportContent, setReportContent] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Mês atual (1-12)
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Ano atual
-  const [sortOption, setSortOption] = useState("category"); // Opção de ordenação
-  const [reportType, setReportType] = useState("monthly"); // Tipo de relatório
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); 
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); 
+  const [sortOption, setSortOption] = useState("category"); 
+  const [reportType, setReportType] = useState("monthly"); 
+  const [selectedItemID, setSelectedItemID] = useState(null);  
 
   const onDelete = (ID) => {
-    if (!ID || typeof ID !== "string") {
-      console.error("ID inválido para exclusão:", ID);
-      return;
-    }
-    
-    const newArray = itens.filter((transaction) => transaction.id !== ID);
+    setSelectedItemID(ID);  
+    setShowConfirmModal(true);  
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedItemID) return;
+
+
+    const newArray = itens.filter((transaction) => transaction.id !== selectedItemID);
     setItens(newArray);
 
-    const removeTransactionFromFirestore = async (ID) => {
+
+    const removeTransactionFromFirestore = async () => {
       try {
-        const docRef = doc(db, "Transactions", ID);
-        await deleteDoc(doc(db, "Transactions", ID));
+        const docRef = doc(db, "Transactions", selectedItemID);
+        await deleteDoc(docRef);
         console.log("Transação removida do Firestore!");
       } catch (error) {
         console.error("Erro ao remover transação:", error);
       }
     };
-    removeTransactionFromFirestore(ID);
+    await removeTransactionFromFirestore();
+    setShowConfirmModal(false);  
+    setShowSuccessModal(true);  
+
+    setTimeout(() => {
+      setShowSuccessModal(false);
+    }, 500); // 3000ms = 3 segundos
+  };
+
+  const handleCancelDelete = () => {
+    setShowConfirmModal(false);  // Fechar modal de confirmação sem excluir
   };
 
   const handleReport = () => {
@@ -173,6 +191,16 @@ const Grid = ({ itens, setItens }) => {
         <h2>Relatório de Gastos</h2>
         <pre>{reportContent}</pre>
       </Modal>
+
+      <ConfirmModal show={showConfirmModal} onClose={() => setShowConfirmModal(false)}>
+        <h2>Tem certeza que deseja excluir essa transação?</h2>
+        <C.ConfirmButtonSim onClick={handleConfirmDelete}>Sim</C.ConfirmButtonSim>
+        <C.ConfirmButtonNao className="confirm-btn-nao" onClick={handleCancelDelete}>Não</C.ConfirmButtonNao>
+      </ConfirmModal>
+
+      <ConfirmModal show={showSuccessModal} onClose={() => setShowSuccessModal(false)}>
+        <h2>Exclusão realizada com sucesso!</h2>
+      </ConfirmModal>
     </div>
   );
 };

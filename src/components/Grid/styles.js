@@ -63,3 +63,33 @@ export const Title = styled.h2`
   font-size: 24px;
   color: #333;
 `;
+
+export const ConfirmButtonSim = styled.button`
+  background-color: #7f0000;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 10px; /* Espaçamento entre os botões */
+
+  &:hover {
+    background-color: darkred;
+  }
+`;
+
+export const ConfirmButtonNao = styled.button`
+  background-color: #003366;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+
+  &:hover {
+    background-color: darkblue;
+  }
+`;
+
