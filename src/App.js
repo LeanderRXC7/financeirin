@@ -3,21 +3,60 @@ import GlobalStyle from "./styles/global";
 import Header from "./components/header";
 import Resume from "./components/Resume";
 import Form from "./components/Form";
+import Modal from "./components/Modal";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "./firebaseConfig";
-import { suggestSavings } from "./geminiAI"; // Importa a função de sugestões para uso da IA
+import { suggestSavings } from "./geminiAI";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRobot } from "@fortawesome/free-solid-svg-icons"; // Ícone de robô
+import { faPiggyBank, faSpinner } from "@fortawesome/free-solid-svg-icons";
+
+// Componente para estilizar as sugestões
+const StyledSuggestions = ({ suggestions }) => {
+  if (!suggestions || suggestions.length === 0) {
+    return <p>Nenhuma sugestão disponível.</p>;
+  }
+
+  return (
+    <div>
+      {suggestions.map((item, index) => (
+        <div
+          key={index}
+          style={{
+            marginBottom: "20px",
+            padding: "15px",
+            border: "1px solid #ccc",
+            borderRadius: "5px",
+            backgroundColor: "#f9f9f9",
+          }}
+        >
+          <h3 style={{ color: "#003366", marginBottom: "10px" }}>
+            Categoria: {item.categoria}
+          </h3>
+          <p style={{ margin: "10px 0", fontStyle: "italic" }}>
+            <strong>Análise:</strong> {item.analise}
+          </p>
+          <ul style={{ paddingLeft: "20px", margin: "10px 0" }}>
+            {item.recomendacoes.map((recomendacao, idx) => (
+              <li key={idx} style={{ lineHeight: "1.6" }}>
+                {recomendacao}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const App = () => {
   const [transactionsList, setTransactionsList] = useState([]);
   const [income, setIncome] = useState(0);
   const [expense, setExpense] = useState(0);
   const [total, setTotal] = useState(0);
-  const [suggestions, setSuggestions] = useState(""); // Estado para armazenar as sugestões da IA
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false); // Estado para exibir o carregamento das sugestões
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Busca transações do Firestore
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -34,7 +73,6 @@ const App = () => {
     fetchTransactions();
   }, []);
 
-  // Calcula entrada, saída e total
   useEffect(() => {
     const amountExpense = transactionsList
       .filter((item) => item.expense)
@@ -54,16 +92,12 @@ const App = () => {
     setTotal(`${Number(income) < Number(expense) ? "-" : ""}R$ ${total}`);
   }, [transactionsList]);
 
-  // Função para adicionar nova transação
   const handleAdd = (transaction) => {
     const newArrayTransactions = [...transactionsList, transaction];
     setTransactionsList(newArrayTransactions);
-    console.log("Transação salva localmente (apenas para fins de depuração).");
   };
 
-  // Função para gerar sugestões de economia com IA
   const handleGenerateSuggestions = async () => {
-    // Filtrar apenas saídas (gastos)
     const expensesOnly = transactionsList.filter(
       (transaction) => transaction.expense
     );
@@ -73,15 +107,16 @@ const App = () => {
       return;
     }
 
-    setLoadingSuggestions(true); // Ativa o estado de carregamento
+    setLoadingSuggestions(true);
     try {
-      const suggestionsText = await suggestSavings(expensesOnly); // Envia apenas as saídas para análise pela IA
-      setSuggestions(suggestionsText);
+      const suggestionsData = await suggestSavings(expensesOnly);
+      setSuggestions(suggestionsData);
+      setIsModalOpen(true);
     } catch (error) {
       console.error("Erro ao gerar sugestões:", error);
       alert("Não foi possível gerar sugestões no momento.");
     } finally {
-      setLoadingSuggestions(false); // Desativa o estado de carregamento
+      setLoadingSuggestions(false);
     }
   };
 
@@ -95,7 +130,6 @@ const App = () => {
         setTransactionsList={setTransactionsList}
       />
 
-      {/* Botão para gerar sugestões */}
       <div style={{ position: "fixed", bottom: "20px", right: "20px" }}>
         <button
           onClick={handleGenerateSuggestions}
@@ -115,30 +149,34 @@ const App = () => {
           }}
           onMouseEnter={(e) => (e.target.style.backgroundColor = "#007BFF")}
           onMouseLeave={(e) => (e.target.style.backgroundColor = "#003366")}
+          disabled={loadingSuggestions}
         >
-          <FontAwesomeIcon icon={faRobot} size="2x" />
+          {loadingSuggestions ? (
+            <FontAwesomeIcon icon={faSpinner} spin size="2x" />
+          ) : (
+            <FontAwesomeIcon icon={faPiggyBank} size="2x" />
+          )}
         </button>
       </div>
 
-      {/* Exibição das sugestões */}
-      {suggestions && (
-        <div
+      <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <h2 style={{ marginBottom: "20px" }}>Sugestões de Economia</h2>
+        <StyledSuggestions suggestions={suggestions} />
+        <button
+          onClick={() => setIsModalOpen(false)}
           style={{
             marginTop: "20px",
-            padding: "15px",
-            border: "1px solid #ccc",
+            padding: "10px 20px",
+            backgroundColor: "#003366",
+            color: "#fff",
+            border: "none",
             borderRadius: "5px",
-            backgroundColor: "#f9f9f9",
+            cursor: "pointer",
           }}
         >
-          <h2>Sugestões de Economia</h2>
-          {suggestions.split("\n").map((line, index) => (
-            <p key={index} style={{ margin: "5px 0", lineHeight: "1.6" }}>
-              {line.trim()}
-            </p>
-          ))}
-        </div>
-      )}
+          Fechar
+        </button>
+      </Modal>
 
       <GlobalStyle />
     </>
