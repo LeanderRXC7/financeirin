@@ -10,12 +10,24 @@ const genAI = new GoogleGenerativeAI("AIzaSyAWQIy7BtiWMlHJIpmYf-RbaJyA2vQDMdw");
 async function suggestSavings(expenses) {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  const formattedExpenses = expenses
-    .map(
-      (exp) =>
-        `Categoria: ${exp.category}, Descrição: ${exp.desc}, Valor: ${exp.amount}`
-    )
-    .join("\n");
+  // Agrupa os gastos por categoria
+  const groupedExpenses = expenses.reduce((acc, expense) => {
+    if (!acc[expense.category]) {
+      acc[expense.category] = [];
+    }
+    acc[expense.category].push({ desc: expense.desc, amount: expense.amount });
+    return acc;
+  }, {});
+
+  // Cria uma string formatada para cada categoria com seus respectivos detalhes
+  const formattedExpenses = Object.entries(groupedExpenses)
+    .map(([category, details]) => {
+      const detailsText = details
+        .map((item) => `Descrição: ${item.desc}, Valor: ${item.amount}`)
+        .join("\n      ");
+      return `Categoria: ${category}\n      ${detailsText}`;
+    })
+    .join("\n\n");
 
   const prompt = `
   Você é uma ferramenta de análise financeira avançada, especializada em ajudar as pessoas a economizar de forma prática e eficiente. Sua tarefa é analisar os gastos fornecidos e gerar análises detalhadas e recomendações altamente personalizadas.
