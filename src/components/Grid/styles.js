@@ -12,30 +12,30 @@ export const Table = styled.table`
 
 export const ReportButton = styled.button`
   display: block; /* Garante que o margin auto funcione */
-  margin: 20px auto 0; /* Centraliza horizontalmente e adiciona margem superior */
+  margin: 5px auto 0; /* Centraliza horizontalmente e adiciona margem superior */
   padding: 10px 20px; /* Ajuste conforme necessário */
-  margin-bottom: 20px;
+  //margin-bottom: 20px;
   cursor: pointer; /* Indica interatividade */
-  background-color: #003366;
-  color: white;
+  background-color: #FFF;
+  color: #003366;
   border: none;
   border-radius: 5px;
   font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
 
   &:hover {
-    background-color: #003366;
+   //background-color: #7b7b7b;
   }
 `;
 
 export const SelectContainer = styled.div`
-  display: flex;
-  justify-content: center; /* Centraliza horizontalmente */
-  align-items: center; /* Alinha verticalmente */
+justify-content: center;
   gap: 10px; /* Espaçamento entre o select e o botão */
   width: 100%;
   label {
     font-size: 16px;
+    color: white;
   }
   select {
     padding: 5px;
@@ -90,6 +90,24 @@ export const ConfirmButtonNao = styled.button`
 
   &:hover {
     background-color: darkblue;
+  }
+`;
+
+export const FilterContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: #003366; /* Cor de fundo da caixa */
+  padding: 20px; /* Espaçamento interno */
+  border: 1px solid #ccc; /* Borda da caixa */
+  border-radius: 5px;
+  margin: 20px auto; /* Margem para separação */
+  max-width: 700px;
+
+  & > div {
+    display: flex;
+    flex-wrap: wrap; /* Para quebrar linhas caso necessário */
+    gap: 10px; /* Espaçamento entre os itens */
+    margin-bottom: 20px; /* Espaço entre os filtros e o botão */
   }
 `;
 

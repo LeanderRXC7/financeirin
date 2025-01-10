@@ -3,6 +3,8 @@ import * as C from "./styles";
 import Grid from "../Grid";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 
 const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
@@ -105,7 +107,7 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
           />
           <C.Label htmlFor="rExpenses">Saída</C.Label>
         </C.RadioGroup>
-        <C.Button onClick={handleSave}>ADICIONAR</C.Button>
+        <C.Button onClick={handleSave}><FontAwesomeIcon icon={faPlus} size="2x" /></C.Button>
       </C.Container>
       <Grid itens={transactionsList} setItens={setTransactionsList} />
     </>

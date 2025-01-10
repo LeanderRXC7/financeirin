@@ -8,27 +8,27 @@ import { db } from "../../firebaseConfig";
 
 const Grid = ({ itens, setItens }) => {
   const [showModal, setShowModal] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);  
-  const [showSuccessModal, setShowSuccessModal] = useState(false);  
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [reportContent, setReportContent] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); 
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); 
-  const [sortOption, setSortOption] = useState("category"); 
-  const [reportType, setReportType] = useState("monthly"); 
-  const [selectedItemID, setSelectedItemID] = useState(null);  
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [sortOption, setSortOption] = useState("category");
+  const [reportType, setReportType] = useState("monthly");
+  const [selectedItemID, setSelectedItemID] = useState(null);
 
   const onDelete = (ID) => {
-    setSelectedItemID(ID);  
-    setShowConfirmModal(true);  
+    setSelectedItemID(ID);
+    setShowConfirmModal(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!selectedItemID) return;
 
-
-    const newArray = itens.filter((transaction) => transaction.id !== selectedItemID);
+    const newArray = itens.filter(
+      (transaction) => transaction.id !== selectedItemID
+    );
     setItens(newArray);
-
 
     const removeTransactionFromFirestore = async () => {
       try {
@@ -40,8 +40,8 @@ const Grid = ({ itens, setItens }) => {
       }
     };
     await removeTransactionFromFirestore();
-    setShowConfirmModal(false);  
-    setShowSuccessModal(true);  
+    setShowConfirmModal(false);
+    setShowSuccessModal(true);
 
     setTimeout(() => {
       setShowSuccessModal(false);
@@ -49,7 +49,7 @@ const Grid = ({ itens, setItens }) => {
   };
 
   const handleCancelDelete = () => {
-    setShowConfirmModal(false);  // Fechar modal de confirmação sem excluir
+    setShowConfirmModal(false); // Fechar modal de confirmação sem excluir
   };
 
   const handleReport = () => {
@@ -102,9 +102,9 @@ const Grid = ({ itens, setItens }) => {
       report = sortedByDate
         .map(
           (item) =>
-            `${item.date}: ${item.desc} - R$ ${parseFloat(
-              item.amount
-            ).toFixed(2)}`
+            `${item.date}: ${item.desc} - R$ ${parseFloat(item.amount).toFixed(
+              2
+            )}`
         )
         .join("\n");
     }
@@ -135,70 +135,88 @@ const Grid = ({ itens, setItens }) => {
           ))}
         </C.Tbody>
       </C.Table>
-      <C.SelectContainer>
-        <label>
-          Tipo de relatório:
-          <select
-            value={reportType}
-            onChange={(e) => setReportType(e.target.value)}
-          >
-            <option value="monthly">Mensal</option>
-            <option value="weekly">Semanal</option>
-          </select>
-        </label>
-        <label>
-          Mês:
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-          >
-            {[...Array(12)].map((_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {i + 1}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Ano:
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-          >
-            {[...Array(10)].map((_, i) => {
-              const year = new Date().getFullYear() - i;
-              return (
-                <option key={year} value={year}>
-                  {year}
+      <C.FilterContainer>
+        <C.SelectContainer>
+          <label>
+            Tipo de relatório:
+            <select
+              value={reportType}
+              onChange={(e) => setReportType(e.target.value)}
+            >
+              <option value="monthly">Mensal</option>
+              <option value="weekly">Semanal</option>
+            </select>
+          </label>
+          <label>
+            Mês:
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+            >
+              {[...Array(12)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}
                 </option>
-              );
-            })}
-          </select>
-        </label>
-        <label>
-          Ordenar por:
-          <select
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
-          >
-            <option value="category">Categoria</option>
-            <option value="period">Período</option>
-          </select>
-        </label>
-      </C.SelectContainer>
-      <C.ReportButton onClick={handleReport}>RELATÓRIO DE GASTOS</C.ReportButton>
+              ))}
+            </select>
+          </label>
+          <label>
+            Ano:
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+            >
+              {[...Array(10)].map((_, i) => {
+                const year = new Date().getFullYear() - i;
+                return (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                );
+              })}
+            </select>
+          </label>
+          <label>
+            Ordenar por:
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+            >
+              <option value="category">Categoria</option>
+              <option value="period">Período</option>
+            </select>
+          </label>
+        </C.SelectContainer>
+        <C.ReportButton onClick={handleReport}>
+          RELATÓRIO DE GASTOS
+        </C.ReportButton>
+      </C.FilterContainer>
+
       <Modal show={showModal} onClose={() => setShowModal(false)}>
         <h2>Relatório de Gastos</h2>
         <pre>{reportContent}</pre>
       </Modal>
 
-      <ConfirmModal show={showConfirmModal} onClose={() => setShowConfirmModal(false)}>
+      <ConfirmModal
+        show={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+      >
         <h2>Tem certeza que deseja excluir essa transação?</h2>
-        <C.ConfirmButtonSim onClick={handleConfirmDelete}>Sim</C.ConfirmButtonSim>
-        <C.ConfirmButtonNao className="confirm-btn-nao" onClick={handleCancelDelete}>Não</C.ConfirmButtonNao>
+        <C.ConfirmButtonSim onClick={handleConfirmDelete}>
+          Sim
+        </C.ConfirmButtonSim>
+        <C.ConfirmButtonNao
+          className="confirm-btn-nao"
+          onClick={handleCancelDelete}
+        >
+          Não
+        </C.ConfirmButtonNao>
       </ConfirmModal>
 
-      <ConfirmModal show={showSuccessModal} onClose={() => setShowSuccessModal(false)}>
+      <ConfirmModal
+        show={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+      >
         <h2>Exclusão realizada com sucesso!</h2>
       </ConfirmModal>
     </div>

@@ -49,11 +49,12 @@ export const RadioGroup = styled.div`
 `;
 
 export const Button = styled.button`
-  padding: 5px 10px;
+  padding: 0px 15px;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px;
   cursor: pointer;
   color: white;
+  font-weight: bold;
   background-color: #003366;
 `;
 
