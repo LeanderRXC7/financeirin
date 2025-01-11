@@ -193,8 +193,27 @@ const Grid = ({ itens, setItens }) => {
       </C.FilterContainer>
 
       <Modal show={showModal} onClose={() => setShowModal(false)}>
-        <h2>Relatório de Gastos</h2>
-        <pre>{reportContent}</pre>
+        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
+          Relatório de Gastos
+        </h2>
+        <div
+          style={{
+            maxHeight: "400px",
+            overflowY: "auto",
+            padding: "10px",
+            backgroundColor: "#f9f9f9",
+            borderRadius: "8px",
+          }}
+        >
+          {reportContent.split("\n").map((line, index) => (
+            <p
+              key={index}
+              style={{ margin: "5px 0", fontSize: "19px", color: "black" }}
+            >
+              {line}
+            </p>
+          ))}
+        </div>
       </Modal>
 
       <ConfirmModal
