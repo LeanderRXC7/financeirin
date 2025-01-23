@@ -45,11 +45,11 @@ const Grid = ({ itens, setItens }) => {
 
     setTimeout(() => {
       setShowSuccessModal(false);
-    }, 500); // 3000ms = 3 segundos
+    }, 3000); 
   };
 
   const handleCancelDelete = () => {
-    setShowConfirmModal(false); // Fechar modal de confirmação sem excluir
+    setShowConfirmModal(false); 
   };
 
   const handleReport = () => {
