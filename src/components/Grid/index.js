@@ -45,7 +45,7 @@ const Grid = ({ itens, setItens }) => {
 
     setTimeout(() => {
       setShowSuccessModal(false);
-    }, 3000); 
+    }, 2000); 
   };
 
   const handleCancelDelete = () => {
