@@ -6,6 +6,7 @@ import {
   FaRegArrowAltCircleUp,
   FaRegArrowAltCircleDown,
   FaDollarSign,
+  FaPiggyBank,
 } from "react-icons/fa";
 
 const Resume = ({income, expense, total}) => {
@@ -14,6 +15,16 @@ const Resume = ({income, expense, total}) => {
       <ResumeItem title="Entradas" Icon={FaRegArrowAltCircleUp} value={income} />
       <ResumeItem title="Saídas" Icon={FaRegArrowAltCircleDown} value={expense}/>
       <ResumeItem title="Total" Icon={FaDollarSign} value={total}/>
+      {/* Adesivo de aviso */}
+      <C.Sticker>
+        <div className="icon">
+          <FaPiggyBank size={20} />
+        </div>
+        <span>
+          Experimente clicar no botão e obtenha sugestões de economia
+          personalizadas de acordo com seus gastos!
+        </span>
+      </C.Sticker>
     </C.Container>
   );
 };

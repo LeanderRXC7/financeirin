@@ -5,7 +5,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-
+import CurrencyInput from "react-currency-input-field";
 
 const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
   const [desc, setDesc] = useState("");
@@ -20,14 +20,14 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
     if (!desc || !amount || !category) {
       alert("Informe a descrição, o valor e a categoria!");
       return;
-    } else if (amount < 1) {
+    } else if (parseFloat(amount) < 1) {
       alert("O valor tem que ser positivo!");
       return;
     }
 
     const transaction = {
       desc: desc,
-      amount: amount,
+      amount: parseFloat(amount), // Converte o valor para número
       expense: isExpense,
       date: date,
       category: category,
@@ -61,10 +61,20 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
         </C.InputContent>
         <C.InputContent>
           <C.Label>Valor</C.Label>
-          <C.Input
+          {/* Campo com máscara de reais */}
+          <CurrencyInput
             value={amount}
-            type="number"
-            onChange={(e) => setAmount(e.target.value)}
+            decimalsLimit={2}
+            intlConfig={{ locale: "pt-BR", currency: "BRL" }}
+            onValueChange={(value) => setAmount(value)}
+            placeholder="R$ 0,00"
+            style={{
+              width: "100%",
+              padding: "5px 0.5px",
+              borderRadius: "5px",
+              border: "1px solid #ccc",
+              fontSize: "15px",
+            }}
           />
         </C.InputContent>
         <C.InputContent>
@@ -96,18 +106,20 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
             id="rIncome"
             defaultChecked
             name="group1"
-            onChange={() => setExpense(!isExpense)}
+            onChange={() => setExpense(false)}
           />
           <C.Label htmlFor="rIncome">Entrada</C.Label>
           <C.Input
             type="radio"
             id="rExpenses"
             name="group1"
-            onChange={() => setExpense(!isExpense)}
+            onChange={() => setExpense(true)}
           />
           <C.Label htmlFor="rExpenses">Saída</C.Label>
         </C.RadioGroup>
-        <C.Button onClick={handleSave}><FontAwesomeIcon icon={faPlus} size="2x" /></C.Button>
+        <C.Button onClick={handleSave}>
+          <FontAwesomeIcon icon={faPlus} size="2x" />
+        </C.Button>
       </C.Container>
       <Grid itens={transactionsList} setItens={setTransactionsList} />
     </>
