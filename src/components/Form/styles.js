@@ -75,3 +75,10 @@ export const Title = styled.h2`
   font-size: 24px;
   color: #333;
 `;
+
+export const Error = styled.span`
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+`;

@@ -65,13 +65,23 @@ const App = () => {
           id: doc.id,
           ...doc.data(),
         }));
-        setTransactionsList(transactions);
+  
+        // Ordena as transações da mais recente para a mais antiga
+        const sortedTransactions = transactions.sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          return dateB - dateA;
+        });
+  
+        setTransactionsList(sortedTransactions); // Atualiza o estado com os dados ordenados
       } catch (error) {
         console.error("Erro ao buscar transações:", error);
       }
     };
+  
     fetchTransactions();
   }, []);
+  
 
   useEffect(() => {
     const amountExpense = transactionsList

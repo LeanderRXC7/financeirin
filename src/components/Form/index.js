@@ -13,21 +13,34 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
   const [isExpense, setExpense] = useState(false);
   const [date, setDate] = useState("");
   const [category, setCategory] = useState("");
+  const [errors, setErrors] = useState({});
 
-  const categories = ["Rendas", "Alimentação", "Contas", "Entretenimento", "Transporte", "Moradia", "Vestuário", "Educação", "Saúde", "Outros"];
+  // Categorias separadas por tipo de transação
+  const incomeCategories = ["Salário", "Outras Rendas"];
+  const expenseCategories = [
+    "Alimentação", "Contas", "Entretenimento", "Transporte", "Moradia",
+    "Vestuário", "Educação", "Saúde", "Outros"
+  ];
+
+  const validateForm = () => {
+    let newErrors = {};
+
+    if (!desc || desc.length < 3) newErrors.desc = "A descrição deve ter pelo menos 3 caracteres.";
+    if (!amount || parseFloat(amount) <= 0) newErrors.amount = "O valor deve ser maior que zero.";
+    if (!date) newErrors.date = "A data é obrigatória.";
+    if (new Date(date) > new Date()) newErrors.date = "A data não pode ser futura.";
+    if (!category) newErrors.category = "Selecione uma categoria.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSave = () => {
-    if (!desc || !amount || !category) {
-      alert("Informe a descrição, o valor e a categoria!");
-      return;
-    } else if (parseFloat(amount) < 1) {
-      alert("O valor tem que ser positivo!");
-      return;
-    }
+    if (!validateForm()) return;
 
     const transaction = {
       desc: desc,
-      amount: parseFloat(amount), // Converte o valor para número
+      amount: parseFloat(amount),
       expense: isExpense,
       date: date,
       category: category,
@@ -38,17 +51,19 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
         const docRef = await addDoc(collection(db, "Transactions"), transaction);
         console.log("Transação salva com ID:", docRef.id);
         transaction.id = docRef.id;
-        handleAdd(transaction); // Atualiza o estado local
+        handleAdd(transaction);
       } catch (error) {
         console.error("Erro ao salvar transação:", error);
       }
     };
+
     saveTransactionToFirestore(transaction);
 
     setDesc("");
     setAmount("");
     setDate("");
     setCategory("");
+    setErrors({});
   };
 
   return (
@@ -58,10 +73,11 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
         <C.InputContent>
           <C.Label>Descrição</C.Label>
           <C.Input value={desc} onChange={(e) => setDesc(e.target.value)} />
+          {errors.desc && <C.Error>{errors.desc}</C.Error>}
         </C.InputContent>
+
         <C.InputContent>
           <C.Label>Valor</C.Label>
-          {/* Campo com máscara de reais */}
           <CurrencyInput
             value={amount}
             decimalsLimit={2}
@@ -69,58 +85,61 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
             onValueChange={(value) => setAmount(value)}
             placeholder="R$ 0,00"
             style={{
-              width: "100%",
-              padding: "5px 0.5px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-              fontSize: "15px",
+              width: "100%", padding: "5px 0.5px", borderRadius: "5px",
+              border: "1px solid #ccc", fontSize: "15px",
             }}
           />
-        </C.InputContent>
-        <C.InputContent>
-          <C.Label>Data</C.Label>
-          <C.Input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
+          {errors.amount && <C.Error>{errors.amount}</C.Error>}
         </C.InputContent>
 
         <C.InputContent>
-          <C.Label>Categoria</C.Label>
-          <C.Select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option value="">Selecione uma categoria</option>
-            {categories.map((cat, index) => (
-              <option key={index} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </C.Select>
-        </C.InputContent>
+          <C.Label>Data</C.Label>
+          <C.Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          {errors.date && <C.Error>{errors.date}</C.Error>}
+        </C.InputContent>    
+
         <C.RadioGroup>
-          <C.Input
-            type="radio"
-            id="rIncome"
-            defaultChecked
-            name="group1"
-            onChange={() => setExpense(false)}
+          <C.Input 
+            type="radio" 
+            id="rIncome" 
+            name="group1" 
+            checked={!isExpense}
+            onChange={() => {
+              setExpense(false);
+              setCategory(""); // Reseta a categoria ao trocar o tipo
+            }} 
           />
           <C.Label htmlFor="rIncome">Entrada</C.Label>
-          <C.Input
-            type="radio"
-            id="rExpenses"
-            name="group1"
-            onChange={() => setExpense(true)}
+          
+          <C.Input 
+            type="radio" 
+            id="rExpenses" 
+            name="group1" 
+            checked={isExpense}
+            onChange={() => {
+              setExpense(true);
+              setCategory(""); // Reseta a categoria ao trocar o tipo
+            }} 
           />
           <C.Label htmlFor="rExpenses">Saída</C.Label>
         </C.RadioGroup>
+
+        <C.InputContent>
+          <C.Label>Categoria</C.Label>
+          <C.Select value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option value="">Selecione uma categoria</option>
+            {(isExpense ? expenseCategories : incomeCategories).map((cat, index) => (
+              <option key={index} value={cat}>{cat}</option>
+            ))}
+          </C.Select>
+          {errors.category && <C.Error>{errors.category}</C.Error>}
+        </C.InputContent>
+
         <C.Button onClick={handleSave}>
           <FontAwesomeIcon icon={faPlus} size="2x" />
         </C.Button>
       </C.Container>
+
       <Grid itens={transactionsList} setItens={setTransactionsList} />
     </>
   );
