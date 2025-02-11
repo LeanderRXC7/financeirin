@@ -179,7 +179,6 @@ const Grid = ({ itens, setItens }) => {
                 <option value="all">Todos</option>
                 <option value="period">Período</option>
                 <option value="category">Categoria</option>
-                <option value="search">Descrição</option>
               </select>
             </label>
 
@@ -233,18 +232,6 @@ const Grid = ({ itens, setItens }) => {
                     )
                   )}
                 </select>
-              </label>
-            )}
-
-            {filterType === "search" && (
-              <label>
-                Buscar descrição:
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Digite a descrição..."
-                />
               </label>
             )}
 
