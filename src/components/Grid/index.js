@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import GridItem from "../GridItem";
 import * as C from "./styles";
 import Modal from "../Modal";
 import ConfirmModal from "../ConfirmModal";
 import { doc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFilter } from "@fortawesome/free-solid-svg-icons";
+
 
 const Grid = ({ itens, setItens }) => {
   const [showModal, setShowModal] = useState(false);
@@ -16,6 +19,50 @@ const Grid = ({ itens, setItens }) => {
   const [sortOption, setSortOption] = useState("category");
   const [reportType, setReportType] = useState("monthly");
   const [selectedItemID, setSelectedItemID] = useState(null);
+
+  const [filteredItens, setFilteredItens] = useState(itens);
+  const [filterType, setFilterType] = useState("all"); // 'all', 'period', 'category', 'search'
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+
+  useEffect(() => {
+    setFilteredItens(itens);
+  }, [itens]);
+
+  const handleFilter = () => {
+    let filteredData = itens;
+
+    if (filterType === "period") {
+      filteredData = itens.filter((item) => {
+        if (!item.date) return false;
+        const [year, month] = item.date.split("-");
+        return (
+          parseInt(month) === parseInt(selectedMonth) &&
+          parseInt(year) === parseInt(selectedYear)
+        );
+      });
+    } else if (filterType === "category" && selectedCategory) {
+      filteredData = itens.filter((item) => item.category === selectedCategory);
+    } else if (filterType === "search") {
+      filteredData = itens.filter((item) =>
+        item.desc.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredItens(filteredData);
+    setShowFilterMenu(false);
+  };
+
+  const handleClearFilters = () => {
+    setFilterType("all");
+    setSelectedMonth(new Date().getMonth() + 1);
+    setSelectedYear(new Date().getFullYear());
+    setSelectedCategory("");
+    setSearchTerm("");
+    setFilteredItens(itens);
+    setShowFilterMenu(false);
+  };
 
   const onDelete = (ID) => {
     setSelectedItemID(ID);
@@ -45,11 +92,11 @@ const Grid = ({ itens, setItens }) => {
 
     setTimeout(() => {
       setShowSuccessModal(false);
-    }, 2000); 
+    }, 2000);
   };
 
   const handleCancelDelete = () => {
-    setShowConfirmModal(false); 
+    setShowConfirmModal(false);
   };
 
   const handleReport = () => {
@@ -116,6 +163,99 @@ const Grid = ({ itens, setItens }) => {
   return (
     <div>
       <C.Title>TRANSAÇÕES</C.Title>
+
+      
+        <C.FilterIcon onClick={() => setShowFilterMenu(!showFilterMenu)}>
+          <FontAwesomeIcon icon={faFilter} size="sm" />
+        </C.FilterIcon>
+        {showFilterMenu && (
+          <C.FilterDropdown>
+            <label>
+              Filtrar por:
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+              >
+                <option value="all">Todos</option>
+                <option value="period">Período</option>
+                <option value="category">Categoria</option>
+                <option value="search">Descrição</option>
+              </select>
+            </label>
+
+            {filterType === "period" && (
+              <>
+                <label>
+                  Mês:
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                  >
+                    {[...Array(12)].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Ano:
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                  >
+                    {[...Array(10)].map((_, i) => {
+                      const year = new Date().getFullYear() - i;
+                      return (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </label>
+              </>
+            )}
+
+            {filterType === "category" && (
+              <label>
+                Categoria:
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                  <option value="">Selecione uma categoria</option>
+                  {Array.from(new Set(itens.map((item) => item.category))).map(
+                    (cat, index) => (
+                      <option key={index} value={cat}>
+                        {cat}
+                      </option>
+                    )
+                  )}
+                </select>
+              </label>
+            )}
+
+            {filterType === "search" && (
+              <label>
+                Buscar descrição:
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Digite a descrição..."
+                />
+              </label>
+            )}
+
+            <C.FilterButtons>
+              <button onClick={handleFilter}>Aplicar</button>
+              <button onClick={handleClearFilters}>Limpar</button>
+            </C.FilterButtons>
+          </C.FilterDropdown>
+        )}
+      
+
       <C.Table>
         <C.Thead>
           <C.Tr>
@@ -130,11 +270,23 @@ const Grid = ({ itens, setItens }) => {
           </C.Tr>
         </C.Thead>
         <C.Tbody>
-          {itens?.map((item, index) => (
-            <GridItem key={index} item={item} onDelete={onDelete} />
-          ))}
+          {filteredItens.length > 0 ? (
+            filteredItens.map((item, index) => (
+              <GridItem key={index} item={item} onDelete={onDelete} />
+            ))
+          ) : (
+            <C.Tr>
+              <C.Td
+                colSpan="6"
+                style={{ textAlign: "center", padding: "10px" }}
+              >
+                Nenhuma transação encontrada.
+              </C.Td>
+            </C.Tr>
+          )}
         </C.Tbody>
       </C.Table>
+      
       <C.FilterContainer>
         <C.SelectContainer>
           <label>
