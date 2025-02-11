@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import GlobalStyle from "./styles/global";
 import Header from "./components/header";
 import Resume from "./components/Resume";
 import Form from "./components/Form";
 import Modal from "./components/Modal";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "./firebaseConfig";
+import Login from "./Logar";
+import Register from "./Register";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { auth, db } from "./firebaseConfig";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { suggestSavings } from "./geminiAI";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPiggyBank, faSpinner } from "@fortawesome/free-solid-svg-icons";
@@ -49,6 +58,7 @@ const StyledSuggestions = ({ suggestions }) => {
 };
 
 const App = () => {
+  const [user, setUser] = useState(null);
   const [transactionsList, setTransactionsList] = useState([]);
   const [income, setIncome] = useState(0);
   const [expense, setExpense] = useState(0);
@@ -57,31 +67,44 @@ const App = () => {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Monitora se o usuário está logado
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Busca as transações do usuário logado
+  useEffect(() => {
+    if (!user) return;
+
     const fetchTransactions = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "Transactions"));
+        const q = query(
+          collection(db, "Transactions"),
+          where("userId", "==", user.uid)
+        );
+        const querySnapshot = await getDocs(q);
         const transactions = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-  
+
         // Ordena as transações da mais recente para a mais antiga
-        const sortedTransactions = transactions.sort((a, b) => {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-          return dateB - dateA;
-        });
-  
-        setTransactionsList(sortedTransactions); // Atualiza o estado com os dados ordenados
+        const sortedTransactions = transactions.sort(
+          (a, b) => new Date(b.date) - new Date(a.date)
+        );
+
+        setTransactionsList(sortedTransactions);
       } catch (error) {
         console.error("Erro ao buscar transações:", error);
       }
     };
-  
+
     fetchTransactions();
-  }, []);
-  
+  }, [user]);
 
   useEffect(() => {
     const amountExpense = transactionsList
@@ -94,7 +117,6 @@ const App = () => {
 
     const expense = amountExpense.reduce((acc, cur) => acc + cur, 0).toFixed(2);
     const income = amountIncome.reduce((acc, cur) => acc + cur, 0).toFixed(2);
-
     const total = Math.abs(income - expense).toFixed(2);
 
     setIncome(`R$ ${income}`);
@@ -107,9 +129,14 @@ const App = () => {
     setTransactionsList(newArrayTransactions);
   };
 
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
+
   const handleGenerateSuggestions = async () => {
     const expensesOnly = transactionsList.filter(
-      (transaction) => transaction.expense
+      (transaction) =>
+        transaction.expense === true || transaction.expense === "true"
     );
 
     if (expensesOnly.length === 0) {
@@ -131,65 +158,116 @@ const App = () => {
   };
 
   return (
-    <>
-      <Header />
-      <Resume income={income} expense={expense} total={total} />
-      <Form
-        handleAdd={handleAdd}
-        transactionsList={transactionsList}
-        setTransactionsList={setTransactionsList}
-      />
+    <Router>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            user ? (
+              <>
+                <Header />
+                <Resume income={income} expense={expense} total={total} />
+                <Form
+                  handleAdd={handleAdd}
+                  transactionsList={transactionsList}
+                  setTransactionsList={setTransactionsList}
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginBottom: "25px",
+                  }}
+                >
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      backgroundColor: "#ff4d4d",
+                      color: "white",
+                      padding: "8px 15px",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: "pointer",
+                      fontSize: "16px",
+                      transition: "0.3s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.target.style.backgroundColor = "#cc0000")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.target.style.backgroundColor = "#ff4d4d")
+                    }
+                  >
+                    Sair
+                  </button>
+                </div>
 
-      <div style={{ position: "fixed", bottom: "20px", right: "20px" }}>
-        <button
-          onClick={handleGenerateSuggestions}
-          style={{
-            width: "60px",
-            height: "60px",
-            backgroundColor: "#003366",
-            color: "#fff",
-            border: "none",
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-          }}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = "#007BFF")}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = "#003366")}
-          disabled={loadingSuggestions}
-        >
-          {loadingSuggestions ? (
-            <FontAwesomeIcon icon={faSpinner} spin size="2x" />
-          ) : (
-            <FontAwesomeIcon icon={faPiggyBank} size="2x" />
-          )}
-        </button>
-      </div>
-
-      <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <h2 style={{ marginBottom: "20px" }}>Sugestões de Economia</h2>
-        <StyledSuggestions suggestions={suggestions} />
-        <button
-          onClick={() => setIsModalOpen(false)}
-          style={{
-            marginTop: "20px",
-            padding: "10px 20px",
-            backgroundColor: "#003366",
-            color: "#fff",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          Fechar
-        </button>
-      </Modal>
-
-      <GlobalStyle />
-    </>
+                <div
+                  style={{ position: "fixed", bottom: "20px", right: "20px" }}
+                >
+                  <button
+                    onClick={handleGenerateSuggestions}
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      backgroundColor: "#003366",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.target.style.backgroundColor = "#007BFF")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.target.style.backgroundColor = "#003366")
+                    }
+                    disabled={loadingSuggestions}
+                  >
+                    {loadingSuggestions ? (
+                      <FontAwesomeIcon icon={faSpinner} spin size="2x" />
+                    ) : (
+                      <FontAwesomeIcon icon={faPiggyBank} size="2x" />
+                    )}
+                  </button>
+                </div>
+                <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
+                  <h2 style={{ marginBottom: "20px" }}>
+                    Sugestões de Economia
+                  </h2>
+                  <StyledSuggestions suggestions={suggestions} />
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    style={{
+                      marginTop: "20px",
+                      padding: "10px 20px",
+                      backgroundColor: "#003366",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Fechar
+                  </button>
+                </Modal>
+                <GlobalStyle />
+              </>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </Router>
   );
 };
 

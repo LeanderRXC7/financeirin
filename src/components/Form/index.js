@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import * as C from "./styles";
 import Grid from "../Grid";
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "../../firebaseConfig";
+import { db, auth } from "../../firebaseConfig";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import CurrencyInput from "react-currency-input-field";
@@ -44,6 +44,7 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
       expense: isExpense,
       date: date,
       category: category,
+      userId: auth.currentUser.uid,
     };
 
     const saveTransactionToFirestore = async (transaction) => {
