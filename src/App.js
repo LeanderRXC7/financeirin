@@ -67,6 +67,8 @@ const App = () => {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
+
   // Monitora se o usuário está logado
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -134,16 +136,18 @@ const App = () => {
   };
 
   const handleGenerateSuggestions = async () => {
-    const expensesOnly = transactionsList.filter(
-      (transaction) =>
-        transaction.expense === true || transaction.expense === "true"
+    const dataToAnalyze =
+      filteredTransactions.length > 0 ? filteredTransactions : transactionsList; //Se o filtro foi limpo, usa todas as transações
+  
+    const expensesOnly = dataToAnalyze.filter(
+      (transaction) => transaction.expense === true || transaction.expense === "true"
     );
-
+  
     if (expensesOnly.length === 0) {
-      alert("Nenhuma saída cadastrada para análise.");
+      alert("Nenhuma saída encontrada para análise.");
       return;
     }
-
+  
     setLoadingSuggestions(true);
     try {
       const suggestionsData = await suggestSavings(expensesOnly);
@@ -156,6 +160,7 @@ const App = () => {
       setLoadingSuggestions(false);
     }
   };
+  
 
   return (
     <Router>
@@ -171,7 +176,10 @@ const App = () => {
                   handleAdd={handleAdd}
                   transactionsList={transactionsList}
                   setTransactionsList={setTransactionsList}
+                  filteredTransactions={filteredTransactions}
+                  setFilteredTransactions={setFilteredTransactions}
                 />
+
                 <div
                   style={{
                     display: "flex",

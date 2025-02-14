@@ -8,8 +8,7 @@ import { db } from "../../firebaseConfig";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
 
-
-const Grid = ({ itens, setItens }) => {
+const Grid = ({ itens, setItens, setFilteredTransactions }) => {
   const [showModal, setShowModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -27,8 +26,8 @@ const Grid = ({ itens, setItens }) => {
   const [showFilterMenu, setShowFilterMenu] = useState(false);
 
   useEffect(() => {
-    setFilteredItens(itens);
-  }, [itens]);
+    setFilteredTransactions(filteredItens);
+  }, [filteredItens, setFilteredTransactions]);
 
   const handleFilter = () => {
     let filteredData = itens;
@@ -51,6 +50,7 @@ const Grid = ({ itens, setItens }) => {
     }
 
     setFilteredItens(filteredData);
+    setFilteredTransactions(filteredData); //Atualiza o estado global corretamente
     setShowFilterMenu(false);
   };
 
@@ -60,9 +60,13 @@ const Grid = ({ itens, setItens }) => {
     setSelectedYear(new Date().getFullYear());
     setSelectedCategory("");
     setSearchTerm("");
-    setFilteredItens(itens);
+    
+    setFilteredItens(itens); 
+    setFilteredTransactions(itens); //Reseta para todas as transações disponíveis
+    
     setShowFilterMenu(false);
   };
+  
 
   const onDelete = (ID) => {
     setSelectedItemID(ID);
@@ -164,84 +168,82 @@ const Grid = ({ itens, setItens }) => {
     <div>
       <C.Title>TRANSAÇÕES</C.Title>
 
-      
-        <C.FilterIcon onClick={() => setShowFilterMenu(!showFilterMenu)}>
-          <FontAwesomeIcon icon={faFilter} size="sm" />
-        </C.FilterIcon>
-        {showFilterMenu && (
-          <C.FilterDropdown>
-            <label>
-              Filtrar por:
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-              >
-                <option value="all">Todos</option>
-                <option value="period">Período</option>
-                <option value="category">Categoria</option>
-              </select>
-            </label>
+      <C.FilterIcon onClick={() => setShowFilterMenu(!showFilterMenu)}>
+        <FontAwesomeIcon icon={faFilter} size="sm" />
+      </C.FilterIcon>
+      {showFilterMenu && (
+        <C.FilterDropdown>
+          <label>
+            Filtrar por:
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <option value="all">Todos</option>
+              <option value="period">Período</option>
+              <option value="category">Categoria</option>
+            </select>
+          </label>
 
-            {filterType === "period" && (
-              <>
-                <label>
-                  Mês:
-                  <select
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                  >
-                    {[...Array(12)].map((_, i) => (
-                      <option key={i + 1} value={i + 1}>
-                        {i + 1}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Ano:
-                  <select
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}
-                  >
-                    {[...Array(10)].map((_, i) => {
-                      const year = new Date().getFullYear() - i;
-                      return (
-                        <option key={year} value={year}>
-                          {year}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </label>
-              </>
-            )}
-
-            {filterType === "category" && (
+          {filterType === "period" && (
+            <>
               <label>
-                Categoria:
+                Mês:
                 <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
                 >
-                  <option value="">Selecione uma categoria</option>
-                  {Array.from(new Set(itens.map((item) => item.category))).map(
-                    (cat, index) => (
-                      <option key={index} value={cat}>
-                        {cat}
-                      </option>
-                    )
-                  )}
+                  {[...Array(12)].map((_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      {i + 1}
+                    </option>
+                  ))}
                 </select>
               </label>
-            )}
+              <label>
+                Ano:
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                >
+                  {[...Array(10)].map((_, i) => {
+                    const year = new Date().getFullYear() - i;
+                    return (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+            </>
+          )}
 
-            <C.FilterButtons>
-              <button onClick={handleFilter}>Aplicar</button>
-              <button onClick={handleClearFilters}>Limpar</button>
-            </C.FilterButtons>
-          </C.FilterDropdown>
-        )}
-      
+          {filterType === "category" && (
+            <label>
+              Categoria:
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="">Selecione uma categoria</option>
+                {Array.from(new Set(itens.map((item) => item.category))).map(
+                  (cat, index) => (
+                    <option key={index} value={cat}>
+                      {cat}
+                    </option>
+                  )
+                )}
+              </select>
+            </label>
+          )}
+
+          <C.FilterButtons>
+            <button onClick={handleFilter}>Aplicar</button>
+            <button onClick={handleClearFilters}>Limpar</button>
+          </C.FilterButtons>
+        </C.FilterDropdown>
+      )}
 
       <C.Table>
         <C.Thead>
@@ -273,7 +275,7 @@ const Grid = ({ itens, setItens }) => {
           )}
         </C.Tbody>
       </C.Table>
-      
+
       <C.FilterContainer>
         <C.SelectContainer>
           <label>
