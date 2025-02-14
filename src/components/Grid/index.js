@@ -7,8 +7,19 @@ import { doc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { faChartPie } from "@fortawesome/free-solid-svg-icons";
 
-const Grid = ({ itens, setItens, setFilteredTransactions, setIsFilterApplied }) => {
+import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+const Grid = ({
+  itens,
+  setItens,
+  setFilteredTransactions,
+  setIsFilterApplied,
+}) => {
   const [showModal, setShowModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -25,9 +36,75 @@ const Grid = ({ itens, setItens, setFilteredTransactions, setIsFilterApplied }) 
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilterMenu, setShowFilterMenu] = useState(false);
 
+  const [showChartModal, setShowChartModal] = useState(false);
+  const [chartData, setChartData] = useState(null);
+
   useEffect(() => {
     setFilteredTransactions(filteredItens);
   }, [filteredItens, setFilteredTransactions]);
+
+  const generateChartData = () => {
+    const filteredItems = itens.filter((item) => {
+      if (!item.date) return false;
+      const [year, month] = item.date.split("-");
+      const itemDate = new Date(year, month - 1);
+
+      if (reportType === "monthly") {
+        return (
+          parseInt(month) === parseInt(selectedMonth) &&
+          parseInt(year) === parseInt(selectedYear) &&
+          item.expense
+        );
+      } else if (reportType === "weekly") {
+        const currentDate = new Date();
+        const selectedDate = new Date(selectedYear, selectedMonth - 1);
+        const weekNumber = Math.ceil((itemDate.getDate() - 1) / 7);
+        const selectedWeek = Math.ceil((currentDate.getDate() - 1) / 7);
+
+        return (
+          parseInt(month) === parseInt(selectedMonth) &&
+          parseInt(year) === parseInt(selectedYear) &&
+          weekNumber === selectedWeek &&
+          item.expense
+        );
+      }
+      return false;
+    });
+
+    if (filteredItems.length === 0) {
+      alert("Nenhuma despesa encontrada para gerar o gráfico.");
+      return null;
+    }
+
+    const groupedData = filteredItems.reduce((acc, item) => {
+      acc[item.category] = acc[item.category]
+        ? acc[item.category] + item.amount
+        : item.amount;
+      return acc;
+    }, {});
+
+    return {
+      labels: Object.keys(groupedData),
+      datasets: [
+        {
+          label: "Despesas por Categoria",
+          data: Object.values(groupedData),
+          backgroundColor: [
+            "#003366",
+            "#007BFF",
+            "#00A36C",
+            "#FF5733",
+            "#FFC300",
+            "#C70039",
+            "#900C3F",
+            "#581845",
+          ],
+          borderColor: "#fff",
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
 
   const handleFilter = () => {
     let filteredData = itens;
@@ -61,14 +138,13 @@ const Grid = ({ itens, setItens, setFilteredTransactions, setIsFilterApplied }) 
     setSelectedYear(new Date().getFullYear());
     setSelectedCategory("");
     setSearchTerm("");
-    
-    setFilteredItens(itens); 
+
+    setFilteredItens(itens);
     setFilteredTransactions(itens); //Reseta para todas as transações disponíveis
     setIsFilterApplied(false);
-    
+
     setShowFilterMenu(false);
   };
-  
 
   const onDelete = (ID) => {
     setSelectedItemID(ID);
@@ -330,10 +406,56 @@ const Grid = ({ itens, setItens, setFilteredTransactions, setIsFilterApplied }) 
             </select>
           </label>
         </C.SelectContainer>
-        <C.ReportButton onClick={handleReport}>
-          RELATÓRIO DE GASTOS
-        </C.ReportButton>
+
+        <C.ButtonContainer>
+          <C.ReportButton onClick={handleReport}>
+            RELATÓRIO DE GASTOS
+          </C.ReportButton>
+
+          <C.ReportButton
+            title="Gere um gráfico das suas despesas"
+            onClick={() => {
+              const chartData = generateChartData();
+              if (chartData) {
+                setChartData(chartData);
+                setShowChartModal(true);
+              }
+            }}
+          >
+            <FontAwesomeIcon icon={faChartPie} size="2x" />
+          </C.ReportButton>
+        </C.ButtonContainer>
       </C.FilterContainer>
+
+      {showChartModal && (
+        <C.ModalOverlay>
+          <C.ModalContent>
+            <C.CloseButton onClick={() => setShowChartModal(false)}>
+              ✖
+            </C.CloseButton>
+            <h2>Gráfico de Despesas</h2>
+            <div
+              style={{
+                width: "100%",
+                maxWidth: "700px",
+                height: "400px",
+                margin: "20px auto",
+              }}
+            >
+              {chartData ? (
+                <Pie
+                  data={chartData}
+                  options={{ responsive: true, maintainAspectRatio: false }}
+                />
+              ) : (
+                <p style={{ textAlign: "center", color: "red" }}>
+                  Nenhuma despesa cadastrada.
+                </p>
+              )}
+            </div>
+          </C.ModalContent>
+        </C.ModalOverlay>
+      )}
 
       <Modal show={showModal} onClose={() => setShowModal(false)}>
         <h2 style={{ textAlign: "center", marginBottom: "20px" }}>

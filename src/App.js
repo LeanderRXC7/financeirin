@@ -68,6 +68,7 @@ const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [filteredTransactions, setFilteredTransactions] = useState([]);
+  const [isFilterApplied, setIsFilterApplied] = useState(false);
 
   // Monitora se o usuário está logado
   useEffect(() => {
@@ -138,16 +139,17 @@ const App = () => {
   const handleGenerateSuggestions = async () => {
     const dataToAnalyze =
       filteredTransactions.length > 0 ? filteredTransactions : transactionsList; //Se o filtro foi limpo, usa todas as transações
-  
+
     const expensesOnly = dataToAnalyze.filter(
-      (transaction) => transaction.expense === true || transaction.expense === "true"
+      (transaction) =>
+        transaction.expense === true || transaction.expense === "true"
     );
-  
+
     if (expensesOnly.length === 0) {
       alert("Nenhuma saída encontrada para análise.");
       return;
     }
-  
+
     setLoadingSuggestions(true);
     try {
       const suggestionsData = await suggestSavings(expensesOnly);
@@ -160,7 +162,6 @@ const App = () => {
       setLoadingSuggestions(false);
     }
   };
-  
 
   return (
     <Router>
@@ -178,6 +179,8 @@ const App = () => {
                   setTransactionsList={setTransactionsList}
                   filteredTransactions={filteredTransactions}
                   setFilteredTransactions={setFilteredTransactions}
+                  isFilterApplied={isFilterApplied}
+                  setIsFilterApplied={setIsFilterApplied}
                 />
 
                 <div
@@ -216,10 +219,11 @@ const App = () => {
                 >
                   <button
                     onClick={handleGenerateSuggestions}
+                    disabled={!isFilterApplied || loadingSuggestions} //Só permite clicar se houver filtro ativo e não estiver carregando
                     style={{
                       width: "60px",
                       height: "60px",
-                      backgroundColor: "#003366",
+                      backgroundColor: !isFilterApplied ? "#ccc" : "#003366",
                       color: "#fff",
                       border: "none",
                       borderRadius: "50%",
@@ -227,21 +231,17 @@ const App = () => {
                       alignItems: "center",
                       justifyContent: "center",
                       boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)",
-                      cursor: "pointer",
+                      cursor:
+                        !isFilterApplied || loadingSuggestions
+                          ? "not-allowed"
+                          : "pointer",
                       transition: "all 0.3s ease",
                     }}
-                    onMouseEnter={(e) =>
-                      (e.target.style.backgroundColor = "#007BFF")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.target.style.backgroundColor = "#003366")
-                    }
-                    disabled={loadingSuggestions}
                   >
                     {loadingSuggestions ? (
-                      <FontAwesomeIcon icon={faSpinner} spin size="2x" />
+                      <FontAwesomeIcon icon={faSpinner} spin size="2x" /> //Mostra o spinner enquanto carrega
                     ) : (
-                      <FontAwesomeIcon icon={faPiggyBank} size="2x" />
+                      <FontAwesomeIcon icon={faPiggyBank} size="2x" /> //Ícone padrão quando não está carregando
                     )}
                   </button>
                 </div>
