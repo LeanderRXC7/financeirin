@@ -242,9 +242,9 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
           <FontAwesomeIcon icon={faPlus} size="2x" />
         </C.Button>
 
-        <C.Button title="Gere um gráfico das suas despesas" onClick={() => setShowModal(true)}>
+        {/* <C.Button title="Gere um gráfico das suas despesas" onClick={() => setShowModal(true)}>
           <FontAwesomeIcon icon={faChartPie} size="2x" />
-        </C.Button>
+        </C.Button> */}
         
       </C.Container>
 

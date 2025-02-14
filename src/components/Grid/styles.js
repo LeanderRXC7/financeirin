@@ -11,8 +11,6 @@ export const Table = styled.table`
 `;
 
 export const ReportButton = styled.button`
-  display: block; /* Garante que o margin auto funcione */
-  margin: 5px auto 0; /* Centraliza horizontalmente e adiciona margem superior */
   padding: 10px 20px; /* Ajuste conforme necessário */
   //margin-bottom: 20px;
   cursor: pointer; /* Indica interatividade */
@@ -173,4 +171,9 @@ export const FilterButtons = styled.div`
   }
 `;
 
+export const ButtonContainer = styled.div`
+  justify-content: center; /* Centraliza os botões */
+  gap: 0px;
+  margin-top: 15px;
+`;
 
