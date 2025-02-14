@@ -14,14 +14,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const Form = ({
-  handleAdd,
-  transactionsList,
-  setTransactionsList,
-  filteredTransactions,
-  setFilteredTransactions,
-  setIsFilterApplied,
-}) => {
+const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
   const [desc, setDesc] = useState("");
   const [amount, setAmount] = useState("");
   const [isExpense, setExpense] = useState(false);
@@ -249,12 +242,10 @@ const Form = ({
           <FontAwesomeIcon icon={faPlus} size="2x" />
         </C.Button>
 
-        {/* <C.Button
-          title="Gere um gráfico das suas despesas"
-          onClick={() => setShowModal(true)}
-        >
+        <C.Button title="Gere um gráfico das suas despesas" onClick={() => setShowModal(true)}>
           <FontAwesomeIcon icon={faChartPie} size="2x" />
-        </C.Button> */}
+        </C.Button>
+        
       </C.Container>
 
       {showModal && (
@@ -285,12 +276,7 @@ const Form = ({
         </C.ModalOverlay>
       )}
 
-      <Grid
-        itens={transactionsList}
-        setItens={setTransactionsList}
-        setFilteredTransactions={setFilteredTransactions}
-        setIsFilterApplied={setIsFilterApplied}
-      />
+      <Grid itens={transactionsList} setItens={setTransactionsList} />
     </>
   );
 };

@@ -16,23 +16,21 @@ export const ReportButton = styled.button`
   padding: 10px 20px; /* Ajuste conforme necessário */
   //margin-bottom: 20px;
   cursor: pointer; /* Indica interatividade */
-  background-color: #fff;
+  background-color: #FFF;
   color: #003366;
   border: none;
   border-radius: 5px;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  margin-right: 0px;
-  margin-left: 0px;
 
   &:hover {
-    //background-color: #7b7b7b;
+   //background-color: #7b7b7b;
   }
 `;
 
 export const SelectContainer = styled.div`
-  justify-content: center;
+justify-content: center;
   gap: 10px; /* Espaçamento entre o select e o botão */
   width: 100%;
   label {
@@ -127,6 +125,7 @@ export const FilterIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+
 `;
 
 export const FilterDropdown = styled.div`
@@ -174,61 +173,4 @@ export const FilterButtons = styled.div`
   }
 `;
 
-export const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Fundo escuro semi-transparente */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999; /* Aparece acima de todo o conteúdo */
-`;
 
-export const ModalContent = styled.div`
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 600px;
-  text-align: center;
-  position: relative; /* Necessário para posicionar o botão "X" corretamente */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  animation: fadeIn 0.3s ease-in-out;
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.9);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-`;
-
-export const CloseButton = styled.button`
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  background: none;
-  border: none;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  color: black; /* Cor preta */
-  transition: 0.2s ease-in-out;
-
-  &:hover {
-    color: gray;
-  }
-`;
-
-export const ButtonContainer = styled.div`
-  display: flex;
-  margin-top: 1px;
-  justify-content: center;
-`;
