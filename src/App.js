@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import GlobalStyle from "./styles/global";
-import Header from "./components/header";
+import Header from "./components/Header";
 import Resume from "./components/Resume";
 import Form from "./components/Form";
 import Modal from "./components/Modal";
