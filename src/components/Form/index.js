@@ -20,6 +20,7 @@ const Form = ({
   setTransactionsList,
   filteredTransactions,
   setFilteredTransactions,
+  setIsFilterApplied,
 }) => {
   const [desc, setDesc] = useState("");
   const [amount, setAmount] = useState("");
@@ -288,6 +289,7 @@ const Form = ({
         itens={transactionsList}
         setItens={setTransactionsList}
         setFilteredTransactions={setFilteredTransactions}
+        setIsFilterApplied={setIsFilterApplied}
       />
     </>
   );

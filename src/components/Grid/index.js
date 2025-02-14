@@ -8,7 +8,7 @@ import { db } from "../../firebaseConfig";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
 
-const Grid = ({ itens, setItens, setFilteredTransactions }) => {
+const Grid = ({ itens, setItens, setFilteredTransactions, setIsFilterApplied }) => {
   const [showModal, setShowModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -51,6 +51,7 @@ const Grid = ({ itens, setItens, setFilteredTransactions }) => {
 
     setFilteredItens(filteredData);
     setFilteredTransactions(filteredData); //Atualiza o estado global corretamente
+    setIsFilterApplied(filteredData.length > 0);
     setShowFilterMenu(false);
   };
 
@@ -63,6 +64,7 @@ const Grid = ({ itens, setItens, setFilteredTransactions }) => {
     
     setFilteredItens(itens); 
     setFilteredTransactions(itens); //Reseta para todas as transações disponíveis
+    setIsFilterApplied(false);
     
     setShowFilterMenu(false);
   };

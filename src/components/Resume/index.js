@@ -21,8 +21,8 @@ const Resume = ({income, expense, total}) => {
           <FaPiggyBank size={20} />
         </div>
         <span>
-          Experimente clicar no botão e obtenha sugestões de economia
-          personalizadas de acordo com seus gastos!
+          Filtre suas despesas e experimente clicar no botão para obter sugestões de economia
+          personalizadas!
         </span>
       </C.Sticker>
     </C.Container>
