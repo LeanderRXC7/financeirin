@@ -32,19 +32,20 @@ const Login = () => {
 
   return (
     <Container>
-     
       <FormWrapper>
-      <Title>FINANCEIRIN'</Title> 
+        <Title>FINANCEIRIN'</Title>
         <Title>Login</Title>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <form onSubmit={handleLogin}>
           <Input
+            name="email"
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <Input
+            name="password"
             type="password"
             placeholder="Senha"
             value={password}
@@ -52,7 +53,9 @@ const Login = () => {
           />
           <Button type="submit">Entrar</Button>
         </form>
-        <LinkText>Não tem conta? <a href="/register">Cadastre-se</a></LinkText>
+        <LinkText>
+          Não tem conta? <a href="/register">Cadastre-se</a>
+        </LinkText>
       </FormWrapper>
     </Container>
   );

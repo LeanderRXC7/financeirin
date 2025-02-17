@@ -161,13 +161,18 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
       <C.Container>
         <C.InputContent>
           <C.Label>Descrição</C.Label>
-          <C.Input value={desc} onChange={(e) => setDesc(e.target.value)} />
+          <C.Input
+            name="desc"
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+          />
           {errors.desc && <C.Error>{errors.desc}</C.Error>}
         </C.InputContent>
 
         <C.InputContent>
           <C.Label>Valor</C.Label>
           <CurrencyInput
+            name="amount"
             value={amount}
             decimalsLimit={2}
             intlConfig={{ locale: "pt-BR", currency: "BRL" }}
@@ -187,6 +192,7 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
         <C.InputContent>
           <C.Label>Data</C.Label>
           <C.Input
+            name="date"
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
@@ -223,6 +229,7 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
         <C.InputContent>
           <C.Label>Categoria</C.Label>
           <C.Select
+            name="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
@@ -238,14 +245,13 @@ const Form = ({ handleAdd, transactionsList, setTransactionsList }) => {
           {errors.category && <C.Error>{errors.category}</C.Error>}
         </C.InputContent>
 
-        <C.Button onClick={handleSave}>
+        <C.Button id="add-transaction" onClick={handleSave}>
           <FontAwesomeIcon icon={faPlus} size="2x" />
         </C.Button>
 
         {/* <C.Button title="Gere um gráfico das suas despesas" onClick={() => setShowModal(true)}>
           <FontAwesomeIcon icon={faChartPie} size="2x" />
         </C.Button> */}
-        
       </C.Container>
 
       {showModal && (
