@@ -39,7 +39,7 @@ Edit
 
 ### Instalação
 
-1. Clone o repositório:
+Clone o repositório:
 
 bash
 git clone https://seu-repositorio-aqui
