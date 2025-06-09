@@ -26,10 +26,6 @@ src/
 ├── index.js # Componente modal de confirmação
 └── styles.js # Estilo do modal
 
-bash
-Copy
-Edit
-
 ## 🚀 Como Rodar o Projeto
 
 ### Pré-requisitos
